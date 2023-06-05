@@ -14,11 +14,10 @@ The accompanying `FreezeObject.cs` script is responsible for gradually changing 
 
 ### Adding the Shader
 
-1. Create a new shader in Unity (Right click in Project panel -> Create -> Shader -> Standard Surface Shader).
-2. Replace the default code with the provided shader code from `IceShader.shader`.
-3. Create a new Material (Right click in Project panel -> Create -> Material).
-4. In the Inspector, set the Shader of this material to the new ice shader (should be under Custom -> IceShader).
-5. Adjust the shader properties as needed. For instance, you can change the `_FrozenAmount`, `_IceColor`, `_Transparency`, and `_Glossiness` to suit your needs.
+1. Import shader into project
+2. Create a new Material (Right click in Project panel -> Create -> Material).
+3. In the Inspector, set the Shader of this material to the new ice shader (should be under Custom -> IceShader).
+4. Adjust the shader properties as needed. For instance, you can change the `_FrozenAmount`, `_IceColor`, `_Transparency`, and `_Glossiness` to suit your needs.
 
 ### Example Usage
 
