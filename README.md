@@ -22,7 +22,13 @@ The accompanying `FreezeObject.cs` script is responsible for gradually changing 
 ### Example Usage
 
 ```csharp
-AddComponent<FreezeObject>();
+// Simply attach this component to any object that contains a renderer to begin freezing it.
+enemy.gameObject.AddComponent<FreezeObject>();
+
+// Example logic for "Freezing" enemy
+enemy.gameObject.GetComponent<EnemyAI>().enabled=false;
+enemy.gameObject.GetComponent<Animation>().enabled=false;
+AudioSource.PlayOneShot(freezeSound, enemy.transform.position, 0.5f);
 ```
 
 When you play the scene, you should see the GameObject gradually transition to a frozen state over `timeToFreeze` seconds.
