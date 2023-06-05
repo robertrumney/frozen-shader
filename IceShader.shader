@@ -6,6 +6,7 @@ Shader "Custom/IceShader" {
         _FrozenAmount("Frozen Amount", Range(0,1)) = 0
         _IceColor("Ice Color", Color) = (0.75, 0.75, 1, 1)
         _Transparency("Transparency", Range(0,1)) = 0.5
+        _Glossiness("Glossiness", Range(0,1)) = 0.5
     }
 
         SubShader{
@@ -19,6 +20,7 @@ Shader "Custom/IceShader" {
                 CGPROGRAM
                 #pragma vertex vert
                 #pragma fragment frag
+                #pragma multi_compile_fwdbase
 
                 #include "UnityCG.cginc"
 
@@ -32,6 +34,7 @@ Shader "Custom/IceShader" {
                     float2 uv : TEXCOORD0;
                     float3 worldNormal : TEXCOORD1;
                     float3 worldPos : TEXCOORD2;
+                    UNITY_FOG_COORDS(3)
                     float4 vertex : SV_POSITION;
                 };
 
@@ -40,6 +43,7 @@ Shader "Custom/IceShader" {
                 float _FrozenAmount;
                 float4 _IceColor;
                 float _Transparency;
+                float _Glossiness;
                 float _Specular;
 
                 v2f vert(appdata v) {
@@ -48,6 +52,7 @@ Shader "Custom/IceShader" {
                     o.uv = v.uv;
                     o.worldNormal = UnityObjectToWorldNormal(v.normal);
                     o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+                    UNITY_TRANSFER_FOG(o,o.vertex);
                     return o;
                 }
 
@@ -60,8 +65,14 @@ Shader "Custom/IceShader" {
                     fixed4 col = tex2D(_MainTex, i.uv);
                     fixed4 iceCol = _IceColor;
                     iceCol *= fresnel * _Specular;
-                    fixed4 finalColor = lerp(col, iceCol, _FrozenAmount);
+
+                    // Reflection
+                    half4 reflColor = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflectDir);
+                    reflColor *= fresnel * _Glossiness;
+
+                    fixed4 finalColor = lerp(col, iceCol + reflColor, _FrozenAmount);
                     finalColor.a = _Transparency;
+                    UNITY_APPLY_FOG(i.fogCoord, finalColor);
                     return finalColor;
                 }
                 ENDCG
