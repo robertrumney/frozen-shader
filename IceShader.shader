@@ -1,82 +1,66 @@
-Shader "Custom/IceShader" {
-    Properties{
+Shader "Custom/IceShader" 
+{
+    Properties
+    {
         _MainTex("Albedo (RGB)", 2D) = "white" {}
+        _Glossiness("Smoothness", Range(0,1)) = 0.5
+        _Metallic("Metallic", Range(0,1)) = 0.0
         _BumpMap("Normal Map", 2D) = "bump" {}
-        _Specular("Specular", Range(0,1)) = 1
+        _BumpScale("Normal Scale", Range(0,1)) = 0.1
+        _Refraction("Refraction", Range(0,1)) = 0.2
+        _Translucency("Translucency", Range(0,1)) = 0.8
+        _SubsurfaceColor("Subsurface Color", Color) = (1,1,1,1)
         _FrozenAmount("Frozen Amount", Range(0,1)) = 0
-        _IceColor("Ice Color", Color) = (0.75, 0.75, 1, 1)
-        _Transparency("Transparency", Range(0,1)) = 0.5
-        _Glossiness("Glossiness", Range(0,1)) = 0.5
     }
-
         SubShader{
-            Tags { "RenderType" = "Transparent" "Queue" = "Transparent"}
+            Tags { "RenderType" = "Opaque" }
             LOD 100
 
-            Pass {
-                Blend SrcAlpha OneMinusSrcAlpha
-                ZWrite On
+            CGPROGRAM
+            #pragma surface surf Standard
+            #pragma target 3.0
 
-                CGPROGRAM
-                #pragma vertex vert
-                #pragma fragment frag
-                #pragma multi_compile_fwdbase
+            #include "UnityPBSLighting.cginc"
 
-                #include "UnityCG.cginc"
+            sampler2D _MainTex;
+            sampler2D _BumpMap;
+            half _BumpScale;
+            half _Refraction;
+            half _Translucency;
+            fixed3 _SubsurfaceColor;
+            half _Glossiness;
+            half _Metallic;
+            half _FrozenAmount;
 
-                struct appdata {
-                    float4 vertex : POSITION;
-                    float2 uv : TEXCOORD0;
-                    float3 normal : NORMAL;
-                };
+            struct Input {
+                float2 uv_MainTex;
+                float3 viewDir;
+                float3 worldNormal;
+                INTERNAL_DATA
+            };
 
-                struct v2f {
-                    float2 uv : TEXCOORD0;
-                    float3 worldNormal : TEXCOORD1;
-                    float3 worldPos : TEXCOORD2;
-                    UNITY_FOG_COORDS(3)
-                    float4 vertex : SV_POSITION;
-                };
+            void surf(Input IN, inout SurfaceOutputStandard o) {
+                fixed4 c = tex2D(_MainTex, IN.uv_MainTex);
 
-                sampler2D _MainTex;
-                sampler2D _BumpMap;
-                float _FrozenAmount;
-                float4 _IceColor;
-                float _Transparency;
-                float _Glossiness;
-                float _Specular;
+                o.Albedo = c.rgb;
+                o.Metallic = _Metallic;
+                o.Smoothness = _Glossiness;
+                o.Alpha = c.a;
 
-                v2f vert(appdata v) {
-                    v2f o;
-                    o.vertex = UnityObjectToClipPos(v.vertex);
-                    o.uv = v.uv;
-                    o.worldNormal = UnityObjectToWorldNormal(v.normal);
-                    o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-                    UNITY_TRANSFER_FOG(o,o.vertex);
-                    return o;
-                }
+                o.Normal = UnpackScaleNormal(tex2D(_BumpMap, IN.uv_MainTex), _BumpScale);
+                o.Emission = 0;
 
-                fixed4 frag(v2f i) : SV_Target {
-                    fixed3 worldNormal = normalize(i.worldNormal + 2.0 * (tex2D(_BumpMap, i.uv).rgb - 0.5));
-                    fixed3 viewDir = normalize(_WorldSpaceCameraPos - i.worldPos);
-                    fixed3 reflectDir = reflect(-viewDir, worldNormal);
-                    float fresnel = pow(1.0 - max(0.0, dot(viewDir, worldNormal)), 1.0 - _FrozenAmount);
+                // Apply refraction
+                float3 worldRefractedDir = refract(-IN.viewDir, IN.worldNormal, _Refraction);
+                half4 reflColor = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, worldRefractedDir);
+                o.Albedo = lerp(o.Albedo, reflColor, _Refraction);
 
-                    fixed4 col = tex2D(_MainTex, i.uv);
-                    fixed4 iceCol = _IceColor;
-                    iceCol *= fresnel * _Specular;
-
-                    // Reflection
-                    half4 reflColor = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflectDir);
-                    reflColor *= fresnel * _Glossiness;
-
-                    fixed4 finalColor = lerp(col, iceCol + reflColor, _FrozenAmount);
-                    finalColor.a = _Transparency;
-                    UNITY_APPLY_FOG(i.fogCoord, finalColor);
-                    return finalColor;
-                }
-                ENDCG
+                // Apply fake subsurface scattering
+                half rim = 1.0 - max(0.0, dot(IN.viewDir, IN.worldNormal));
+                half3 scatter = _SubsurfaceColor.rgb * rim * _Translucency * _FrozenAmount;
+                o.Albedo += scatter;
             }
+            ENDCG
         }
             FallBack "Diffuse"
 }
