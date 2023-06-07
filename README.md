@@ -33,6 +33,17 @@ AudioSource.PlayClipAtPoint(freezeSound, enemy.transform.position, 0.5f);
 
 When you play the scene, you should see the GameObject gradually transition to a frozen state over `timeToFreeze` seconds.
 
+## Important Info
+
+It is very important to note, that you should never add the `FreezeObject` script to an object more than once. A flag of some kind is useful:
+```csharp
+if(!enemy.isFrozen)
+{
+    enemy.gameObject.AddComponent<FreezeObject>();
+    enemy.isFrozen=true;
+}
+```
+
 ## Example
 
 To see an example of the script and shader in action, attach the `FreezeObject` script to a GameObject with the ice shader material, then press play in Unity. The object should start to appear as if it's being frozen over time.
