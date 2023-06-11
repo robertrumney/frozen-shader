@@ -44,7 +44,7 @@ if(!enemy.isFrozen)
 }
 ```
 
-It is also VERY important to note that shader MUST be installed into a `/Resources/` folder in order for the `FreezeObject` scripr to function. If it is not, the shader will be pink.
+It is also VERY important to note that shader MUST be installed into a `/Resources/` folder in order for the `FreezeObject` script to function. If it is not, the shader will be pink.
 
 ## Example
 
