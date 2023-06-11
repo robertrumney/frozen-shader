@@ -15,6 +15,7 @@ public class FreezeObject : MonoBehaviour
         else
             objectRenderer = GetComponentInChildren<Renderer>();
 
+
         if (objectRenderer == null) return;
 
         AssignShader();
@@ -27,13 +28,19 @@ public class FreezeObject : MonoBehaviour
         Shader iceShader = Shader.Find("Custom/IceShader");
 
         // Assign the shader to the material
-        if (iceShader != null)
+        if (objectRenderer.materials.Length > 1)
         {
-            objectRenderer.material.shader = iceShader;
+            // The objectRenderer has multiple materials
+            Material[] materials = objectRenderer.materials;
+            for (int i = 0; i < materials.Length; i++)
+            {
+                materials[i].shader = iceShader;
+            }
         }
         else
         {
-            Debug.LogError("Ice shader not found. Please ensure it's included in the build.");
+            // The objectRenderer has a single material
+            objectRenderer.material.shader = iceShader;
         }
     }
 
