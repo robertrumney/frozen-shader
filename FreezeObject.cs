@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class FreezeObject : MonoBehaviour
 {
@@ -34,7 +35,10 @@ public class FreezeObject : MonoBehaviour
             Material[] materials = objectRenderer.materials;
             for (int i = 0; i < materials.Length; i++)
             {
-                materials[i].shader = iceShader;
+                if (i == 0)
+                    materials[i].shader = iceShader;
+                else
+                    materials[i].shader = materials[0].shader;
             }
         }
         else
@@ -54,38 +58,55 @@ public class FreezeObject : MonoBehaviour
         float elapsed = 0;
         float currentFreezeAmount = objectRenderer.material.GetFloat("_FrozenAmount");
 
-        // Get the initial values of the properties to be lerped
-        float initialRefraction = objectRenderer.material.GetFloat("_Refraction");
-        float initialMetallic = objectRenderer.material.GetFloat("_Metallic");
-        float initialTranslucency = objectRenderer.material.GetFloat("_Translucency");
-        Color initialSubsurfaceColor = objectRenderer.material.GetColor("_SubsurfaceColor");
+        // Create a list to store the initial values of the properties to be lerped for each material
+        List<float> initialRefraction = new List<float>();
+        List<float> initialMetallic = new List<float>();
+        List<float> initialTranslucency = new List<float>();
+        List<Color> initialSubsurfaceColor = new List<Color>();
+
+        // Store the initial values of the properties for each material
+        foreach (Material material in objectRenderer.materials)
+        {
+            initialRefraction.Add(material.GetFloat("_Refraction"));
+            initialMetallic.Add(material.GetFloat("_Metallic"));
+            initialTranslucency.Add(material.GetFloat("_Translucency"));
+            initialSubsurfaceColor.Add(material.GetColor("_SubsurfaceColor"));
+        }
 
         while (elapsed < time)
         {
             elapsed += Time.deltaTime;
             float t = elapsed / time;
 
-            // Perform lerping for each property
-            float newRefraction = Mathf.Lerp(initialRefraction, 0.155f, t);
-            float newMetallic = Mathf.Lerp(initialMetallic, 0.395f, t);
-            float newTranslucency = Mathf.Lerp(initialTranslucency, 0.648f, t);
-            Color newSubsurfaceColor = Color.Lerp(initialSubsurfaceColor, new Color(136 / 255f, 219 / 255f, 1f), t);
+            // Perform lerping for each property and material
+            for (int i = 0; i < objectRenderer.materials.Length; i++)
+            {
+                Material material = objectRenderer.materials[i];
 
-            // Update the material properties
-            objectRenderer.material.SetFloat("_FrozenAmount", Mathf.Lerp(currentFreezeAmount, freezeAmount, t));
-            objectRenderer.material.SetFloat("_Refraction", newRefraction);
-            objectRenderer.material.SetFloat("_Metallic", newMetallic);
-            objectRenderer.material.SetFloat("_Translucency", newTranslucency);
-            objectRenderer.material.SetColor("_SubsurfaceColor", newSubsurfaceColor);
+                float newRefraction = Mathf.Lerp(initialRefraction[i], 0.155f, t);
+                float newMetallic = Mathf.Lerp(initialMetallic[i], 0.395f, t);
+                float newTranslucency = Mathf.Lerp(initialTranslucency[i], 0.648f, t);
+                Color newSubsurfaceColor = Color.Lerp(initialSubsurfaceColor[i], new Color(136 / 255f, 219 / 255f, 1f), t);
+
+                // Update the material properties for each material
+                material.SetFloat("_FrozenAmount", Mathf.Lerp(currentFreezeAmount, freezeAmount, t));
+                material.SetFloat("_Refraction", newRefraction);
+                material.SetFloat("_Metallic", newMetallic);
+                material.SetFloat("_Translucency", newTranslucency);
+                material.SetColor("_SubsurfaceColor", newSubsurfaceColor);
+            }
 
             yield return null;
         }
 
-        // Set the final values of the properties
-        objectRenderer.material.SetFloat("_FrozenAmount", freezeAmount);
-        objectRenderer.material.SetFloat("_Refraction", 0.155f);
-        objectRenderer.material.SetFloat("_Metallic", 0.395f);
-        objectRenderer.material.SetFloat("_Translucency", 0.648f);
-        objectRenderer.material.SetColor("_SubsurfaceColor", new Color(136 / 255f, 219 / 255f, 1f));
+        // Set the final values of the properties for each material
+        foreach (Material material in objectRenderer.materials)
+        {
+            material.SetFloat("_FrozenAmount", freezeAmount);
+            material.SetFloat("_Refraction", 0.155f);
+            material.SetFloat("_Metallic", 0.395f);
+            material.SetFloat("_Translucency", 0.648f);
+            material.SetColor("_SubsurfaceColor", new Color(136 / 255f, 219 / 255f, 1f));
+        }
     }
 }
