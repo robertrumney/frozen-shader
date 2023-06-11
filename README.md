@@ -44,6 +44,8 @@ if(!enemy.isFrozen)
 }
 ```
 
+It is also VERY important to note that shader MUST be installed into a `/Resources/` folder in order for the `FreezeObject` scripr to function. If it is not, the shader will be pink.
+
 ## Example
 
 To see an example of the script and shader in action, attach the `FreezeObject` script to a GameObject with the ice shader material, then press play in Unity. The object should start to appear as if it's being frozen over time.
