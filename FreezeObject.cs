@@ -16,7 +16,6 @@ public class FreezeObject : MonoBehaviour
         else
             objectRenderer = GetComponentInChildren<Renderer>();
 
-
         if (objectRenderer == null) return;
 
         AssignShader();
