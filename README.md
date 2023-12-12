@@ -8,7 +8,7 @@ The shader uses albedo and normal maps as a base but includes additional propert
 
 ## Script
 
-The accompanying `FreezeObject.cs` script is responsible for gradually changing an object's appearance to a frozen state. It adjusts the `_FrozenAmount` property of the shader over time to create the transition.
+The accompanying `FreezeObject2D.cs` script is responsible for gradually changing an object's appearance to a frozen state. It adjusts the `_FrozenAmount` property of the shader over time to create the transition.
 
 ## Usage
 
@@ -23,7 +23,7 @@ The accompanying `FreezeObject.cs` script is responsible for gradually changing 
 
 ```csharp
 // Simply attach this component to any object that contains a renderer to begin freezing it.
-enemy.gameObject.AddComponent<FreezeObject>();
+enemy.gameObject.AddComponent<FreezeObject2D>();
 
 // Example logic for "Freezing" enemy
 enemy.gameObject.GetComponent<EnemyAI>().enabled = false;
@@ -35,22 +35,13 @@ When you play the scene, you should see the GameObject gradually transition to a
 
 ## Important Info
 
-It is very important to note, that you should never add the `FreezeObject` script to an object more than once. A flag of some kind is useful:
+It is very important to note, that you should never add the `FreezeObject2D` script to an object more than once. A flag of some kind is useful:
 ```csharp
 if(!enemy.isFrozen)
 {
-    enemy.gameObject.AddComponent<FreezeObject>();
+    enemy.gameObject.AddComponent<FreezeObject2D>();
     enemy.isFrozen=true;
 }
 ```
 
 It is also VERY important to note that shader MUST be installed into a `/Resources/` folder in order for the `FreezeObject` script to function. If it is not, the shader will be pink.
-
-## Example
-To watch this shader in action within the context of an actual game [WATCH HERE](https://www.youtube.com/watch?v=7NfaKEPl7p0)
-
-## Note
-
-This shader and script are quite basic and might not work well for every game or scene. They're intended to provide a starting point and will likely need to be adjusted to suit your specific needs.
-
-Feel free to modify and improve upon them as you see fit!
