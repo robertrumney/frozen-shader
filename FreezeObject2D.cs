@@ -25,7 +25,7 @@ public class FreezeObject : MonoBehaviour
     public void AssignShader()
     {
         // Load the shader
-        Shader iceShader = Shader.Find("Custom/IceShader");
+        Shader iceShader = Shader.Find("Custom/IceShader2D");
 
         // Assign the shader to the material
         if (objectRenderer.materials.Length > 1)
