@@ -1,6 +1,6 @@
 # Unity Ice Shader
 
-This project provides a custom Unity shader that can make objects appear as if they're encased in ice. The ice effect can be animated, allowing objects to transition smoothly between their normal appearance and the frozen state.
+This project provides a custom Unity shader that can make objects appear as if they're frozen in ice. The ice effect can be animated, allowing objects to transition smoothly between their normal appearance and the frozen state.
 
 ## Shader
 
